@@ -22,9 +22,9 @@ struct matrix * make_translate(double x, double y, double z) {
         translate->m[i][i] = 1;
     }
 
-    translate->m[3][0] = x;
-    translate->m[3][1] = y;
-    translate->m[3][2] = z;
+    translate->m[0][3] = x;
+    translate->m[1][3] = y;
+    translate->m[2][3] = z;
 
     return translate;
 }
@@ -49,6 +49,7 @@ struct matrix * make_scale(double x, double y, double z) {
     scale->m[0][0] = x;
     scale->m[1][1] = y;
     scale->m[2][2] = z;
+    print_matrix(scale);
 
     return scale;
 }

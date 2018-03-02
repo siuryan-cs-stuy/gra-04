@@ -9,11 +9,6 @@
 #include "matrix.h"
 #include "parser.h"
 
-int ** get_params(FILE *f, char *line, int num, int **params) {
-    
-    return params;
-
-}
 
 /*======== void parse_file () ==========
   Inputs:   char * filename 
@@ -75,59 +70,113 @@ void parse_file ( char * filename,
         line[strlen(line)-1]='\0';
         printf(":%s:\n",line);
 
-        if (strcmp(line, "line")) {
-            int params[6];
+        if (strcmp(line, "line") == 0) {
+            double params[6];
 
-            fgets(line, 255, f);
             fgets(line, 255, f);
             line[strlen(line)-1]='\0';
 
             char *str = line;
             int i;
             for (i = 0; i < 6; i++) {
-                params[i] = atoi(strsep(&str, " "));
+                params[i] = atof(strsep(&str, " "));
             }
 
             add_edge(edges, params[0], params[1], params[2], params[3], params[4], params[5]);
-            print_matrix(edges);
-        }
-        else if (strcmp(line, "ident")) {
-            ident(transform);
-        }
-        else if (strcmp(line, "scale")) {
-        
-        }
-        else if (strcmp(line, "move")) {
-        
-        }
-        else if (strcmp(line, "rotate")) {
-        
-        }
-        else if (strcmp(line, "apply")) {
-            matrix_mult(transform, edges);
-        }
-        else if (strcmp(line, "display")) {
-            
-            //clear_screen(s);
-            
-            //color c;
-            //c.red = 0;
-            //c.green = 45;
-            //c.blue = 187;
-            //draw_lines(edges, s, c);
-            //display(s);
-            
         }
 
-        else if (strcmp(line, "save")) {
+        else if (strcmp(line, "ident") == 0) {
+            ident(transform);
+        }
+
+        else if (strcmp(line, "scale") == 0) {
+            double params[3];
+
+            fgets(line, 255, f);
+            line[strlen(line)-1]='\0';
+
+            char *str = line;
+            int i;
+            for (i = 0; i < 3; i++) {
+                params[i] = atof(strsep(&str, " "));
+            }
+
+            struct matrix *scale = make_scale(params[0], params[1], params[2]);
+            matrix_mult(scale, transform);
+            print_matrix(transform);
+            free_matrix(scale);
+        }
+
+        else if (strcmp(line, "move") == 0) {
+            double params[3];
+
+            fgets(line, 255, f);
+            line[strlen(line)-1]='\0';
+
+            char *str = line;
+            int i;
+            for (i = 0; i < 3; i++) {
+                params[i] = atof(strsep(&str, " "));
+            }
+
+            struct matrix *translate = make_translate(params[0], params[1], params[2]);
+
+            matrix_mult(translate, transform);
+            print_matrix(transform);
+            free_matrix(translate);
+        }
+
+        else if (strcmp(line, "rotate") == 0) {
+            fgets(line, 255, f);
+            line[strlen(line)-1]='\0';
+
+            char *str = line;
+            char axis = strsep(&str, " ")[0];
+            int theta = atoi(strsep(&str, " "));
+
+            struct matrix *rot;
+            if (axis == 'x') {
+                rot = make_rotX(theta);
+            } else if (axis == 'y') {
+                rot = make_rotY(theta);
+            } else {
+                rot = make_rotZ(theta);
+            }
+
+            matrix_mult(rot, transform);
+            print_matrix(transform);
+            free_matrix(rot);
+        }
+
+        else if (strcmp(line, "apply") == 0) {
+            matrix_mult(transform, edges);
+        }
+
+        else if (strcmp(line, "display") == 0) {
+            clear_screen(s);
+
+            color c;
+            c.red = 0;
+            c.green = 45;
+            c.blue = 187;
+
+            draw_lines(edges, s, c);
+            display(s);
+        }
+
+        else if (strcmp(line, "save") == 0) {
             fgets(line, 255, f);
             line[strlen(line)-1]='\0';
 
             save_extension(s, line);
         }
+
+        else if (strcmp(line, "quit") == 0) {
+            break;
+        }
+
         else {
             printf("Command not found: %s", line);
         }
     }
 }
-  
